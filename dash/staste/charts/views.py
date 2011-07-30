@@ -55,11 +55,11 @@ class TimeserieChart(Chart):
     template_name = 'staste/charts/timeserie.html'
 
     def get_context_data(self):
-        since = datetime.datetime.now() - datetime.timedelta(hours=80)
+        since = datetime.datetime.now() - datetime.timedelta(hours=4)
         
         values = self.get_metrica_values().timeserie(since,
                                                      datetime.datetime.now(),
-                                                     scale='hour')
+                                                     scale='minute')
 
         axis_data = {'name': 'Timeline',
                      'values': list(values)}
