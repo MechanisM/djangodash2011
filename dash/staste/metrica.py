@@ -175,8 +175,9 @@ class MetricaValues(object):
         """Total events count in the subset"""
         return int(redis.hget(self._hash_key, self._hash_field_id) or 0) / self.metrica.multiplier
 
-    def timeserie(self, since, until, scale=None):
-        mult = self.metrica.multiplier
+    def timeserie(self, since, until, scale=None,
+                  _hash_key_postfix='', _mult=None):
+        mult = _mult or self.metrica.multiplier
         prefix = self.metrica.key_prefix()
 
         ts_points = self.metrica.date_axis.timeserie(since, until, scale)
@@ -187,7 +188,7 @@ class MetricaValues(object):
         for point, tp_id in ts_points:
             points.append(point)
             
-            hash_key = '%s:%s' % (prefix, tp_id)
+            hash_key = '%s:%s%s' % (prefix, tp_id, _hash_key_postfix)
             pipe.hget(hash_key, self._hash_field_id)            
 
         values = pipe.execute()
@@ -291,4 +292,22 @@ class AveragedMetricaValues(MetricaValues):
                 yield k1, None
             else:
                 yield k1, v1 / v2
-                             
+
+    def timeserie_counts(self, since, until, scale=None):
+        return self.timeserie(since, until, scale,
+                              _hash_key_postfix=':__len__',
+                              _mult=1)
+
+    def timeserie_averages(self, since, until, scale=None):
+        vals = self.timeserie(since, until, scale)
+        counts = self.timeserie_counts(since, until, scale)
+        
+        for (k1, v1), (k2, v2) in zip(vals, counts):
+            assert k1 == k2
+
+            if not v2:
+                yield k1, 0
+            else:
+                yield k1, v1 / v2
+
+        
