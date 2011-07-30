@@ -32,15 +32,28 @@ class Metrica(object):
         
         hash_key_prefix = self.key_prefix()
 
+        choices_sets_to_append = []
         hash_field_id_parts = []
 
         for axis_kw, axis in self.axes:
+            value = kwargs.pop(axis_kw, None)
+            
             hash_field_id_parts.append(
-                list(axis.get_field_id_parts(kwargs.pop(axis_kw, None)))
+                list(axis.get_field_id_parts(value))
                 )
+
+            try:
+                if axis.store_choice:
+                    set_key = '__choices__:%s' % axis_kw
+                    choices_sets_to_append.append((set_key, value))
+            except AttributeError: # 'duck typing'
+                pass
+                
 
         if kwargs:
             raise TypeError("Invalid kwargs left: %s" % kwargs)
+
+        choices_sets_to_append = filter(None, choices_sets_to_append)
             
         # Here we go: bumping all counters out there
         pipe = redis.pipeline(transaction=False)
@@ -57,8 +70,11 @@ class Metrica(object):
                 pipe.expire(hash_key, date_scale.expiration)
 
             if date_scale.store:
-                set_key = '%s:%s' % (hash_key_prefix, date_scale.store)
-                pipe.sadd(set_key, date_scale.value)
+                choices_sets_to_append.append((date_scale.store, date_scale.value))
+
+        for key, value in choices_sets_to_append:
+            pipe.sadd('%s:%s' % (hash_key_prefix, key),
+                      value)
 
         pipe.execute()
 
@@ -104,7 +120,11 @@ class Metrica(object):
 
         return ':'.join(hash_field_id_parts)
 
+    def get_axis(self, axis_kw):
+        return dict(self.axes)[axis_kw]
 
+    def key_for_axis_choices(self, axis_kw):
+        return '%s:__choices__:%s' % (self.key_prefix(), axis_kw)
 
 
 
@@ -144,11 +164,34 @@ class MetricaValues(object):
         """Total events count in the subset"""
         return int(redis.hget(self._hash_key, self._hash_field_id) or 0)
 
-    def iterate(self):
+    def iterate(self, axis=None):
         """Iterates on a MetricaValues set. Returns a list of (key, value) tuples.
 
         If axis is not specified, iterates on the next scale of a date axis. I.e. mymetric.timespan(year=2011).iterate() will iterate months."""
+        if not axis:
+            return self.iterate_on_dateaxis()
+
+        axis_object = self.metrica.get_axis(axis)
+        keys = axis_object.get_keys(self.metrica.key_for_axis_choices(axis))
+
+        pipe = redis.pipeline(transaction=False)
         
+        for key in keys:
+            fl = dict(self._filter, **{axis: key})
+            hash_field_id = self.metrica.hash_field_id(**fl)
+            
+            pipe.hget(self._hash_key, hash_field_id)
+
+        values = pipe.execute()
+
+        return zip(keys, [int(v or 0) for v in values])
+            
+
+
+    def iterate_on_dateaxis(self):
+        """Iterates on the next scale of a date axis.
+
+        I.e. mymetric.timespan(year=2011).iterate() will iterate months"""
         prefix = self.metrica.key_prefix()
         keys = []
 
