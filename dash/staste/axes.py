@@ -13,13 +13,16 @@ def days_to_seconds(days):
 DATE_SCALES_AND_EXPIRATIONS = [('year', 0),
                                ('month', days_to_seconds(3*365)),
                                ('day', days_to_seconds(185)),
-                               ('hour', days_to_seconds(14))]
+                               ('hour', days_to_seconds(14)),
+                               ('minute', days_to_seconds(1))]
 
 DATE_SCALES_DICT = dict(DATE_SCALES_AND_EXPIRATIONS)
 
 DATE_SCALES_RANGES = {'month': lambda **t: (1, 12),
                       'day': lambda year, month, **t: (1, calendar.monthrange(year, month)[1]),
-                      'hour': lambda **t: (0, 23)}
+                      'hour': lambda **t: (0, 23),
+                      'minute': lambda **t: (0, 60)
+                      }
 
 DateScale = namedtuple('DateScale', ['id', 'expiration', 'value', 'store'])
 
