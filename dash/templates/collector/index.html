@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+        <script type="text/javascript">
+            google.load("visualization", "1", {packages:["corechart"]});
+            google.setOnLoadCallback(drawChart);
+            function drawChart() {
+                var data = new google.visualization.DataTable();
+                data.addColumn('string', 'Year');
+                data.addColumn('number', 'Male');
+                data.addColumn('number', 'Female');
+                data.addColumn('number', 'Other'); 
+
+                {% for point in genders %}
+                    data.addRow(["{{ point.0 }}", {{ point.1 }}, {{ point.2 }}, {{ point.3 }}]);
+                {% endfor %}
+                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                chart.draw(data, {width: 400, height: 240, title: 'Company Performance'});
+              }
+        </script>
+    </head>
+
+    <body>
+    <br />{{ ages }}
+        <form action="" method="post">{% csrf_token %}
+            {{ form.as_p }}
+            <input type="submit" value="Post!" />
+        </form>
+        <div id="chart_div"></div>
+    </body>
+</html>

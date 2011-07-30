@@ -54,6 +54,7 @@ INSTALLED_APPS = (
 
     # internal
     # 'app1',
+    'dash.collector',
 )
 
 SITE_ID = 1
@@ -98,5 +99,7 @@ _DISABLED_LOGGING = {
 
 TEST_EXCLUDE = ('django',)
 TEST_RUNNER = 'settings.test_suite.AdvancedTestSuiteRunner'
+
+STASTE_METRICS_PREFIX = ''
 
 
