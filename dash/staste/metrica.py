@@ -21,7 +21,7 @@ class Metrica(object):
 
         name - should be a unique (among your metrics) string, it will be used in Redis identifiers (lots of them)
         axes - a list/iterable of tuples: (keyword, staste.axes.Axis object). can be empty
-        multiplier - you multiply all values. it's useful since Redis does not understand floating point increments"""
+        multiplier - you can multiply all values you provide. it's useful since Redis does not understand floating point increments. (all totals() will be divided back by this)"""
         self.name = str(name)
         self.axes = list(axes)
         self.date_axis = DATE_AXIS
