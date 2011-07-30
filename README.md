@@ -39,4 +39,6 @@ Okay, fine. Now you can have some stats, like this:
 
     >>> metrica.timespan(year=2010, month=2).filter(gender='boy').iterate('age')
     [('120', 1), ('19', 0), ('17', 10), ('18', 17)]
-    
+
+
+It's all in Redis. So it's fast and you're the coolest kid in the block.
