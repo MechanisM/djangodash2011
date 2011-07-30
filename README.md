@@ -54,7 +54,8 @@ Everything is the same: you can use Axes, et cetera.
 
 If you want to calculate averages, you'll need an AveragedMetrica class instead of Metrica. It will count both sum and quantity of your events:
 
-   metrica = AveragedMetrica(name='some_averaged_metrica', axes=[('c', axis)], multiplier=100)
+
+    metrica = AveragedMetrica(name='some_averaged_metrica', axes=[('c', axis)], multiplier=100)
 
     d1 = datetime.datetime(2010, 2, 7)
     d2 = datetime.datetime(2010, 2, 8)
