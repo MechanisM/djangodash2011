@@ -5,5 +5,5 @@ from redis import Redis
 
 redis = Redis(**getattr(settings, 'STASTE_REDIS_CONNECTION', {}))
 
-if not settings.STASTE_METRICS_PREFIX:
+if not getattr(settings, 'STASTE_METRICS_PREFIX', None):
     settings.STASTE_METRICS_PREFIX = 'staste'
