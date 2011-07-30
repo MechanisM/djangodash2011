@@ -21,7 +21,7 @@ DATE_SCALES_DICT = dict(DATE_SCALES_AND_EXPIRATIONS)
 DATE_SCALES_RANGES = {'month': lambda **t: (1, 12),
                       'day': lambda year, month, **t: (1, calendar.monthrange(year, month)[1]),
                       'hour': lambda **t: (0, 23),
-                      'minute': lambda **t: (0, 60)
+                      'minute': lambda **t: (0, 59)
                       }
 
 DateScale = namedtuple('DateScale', ['id', 'expiration', 'value', 'store'])
