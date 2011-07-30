@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+        var data = new google.visualization.DataTable();
+
+
+          data.addColumn('string', '{{ axis.name|escapejs }}');
+        data.addColumn('number', 'Count');          
+        data.addRows({{ axis.values|length }});
+          {% for key, value in axis.values %}
+          data.setValue({{ forloop.counter0 }}, 0, '{{ key|escapejs }}');
+          data.setValue({{ forloop.counter0 }}, 1, {{ value }});
+          {% endfor %}
+
+
+        var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
+                  chart.draw(data, {width: document.width - 30,
+                          height: document.height - 30,
+                          title: '{{ axis.name|escapejs }}'});
+
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="chart_div"></div>
+  </body>
+</html>

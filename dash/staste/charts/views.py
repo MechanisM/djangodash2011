@@ -1,5 +1,7 @@
 from django.views.generic import TemplateView
 
+import datetime
+
 from staste.dateaxis import DATE_SCALES_AND_EXPIRATIONS
 
 class Chart(TemplateView):
@@ -47,3 +49,20 @@ class TimelineChart(Chart):
                      'values': list(values)}
         
         return {'axis': axis_data}
+
+    
+class TimeserieChart(Chart):
+    template_name = 'staste/charts/timeserie.html'
+
+    def get_context_data(self):
+        since = datetime.datetime.now() - datetime.timedelta(hours=80)
+        
+        values = self.get_metrica_values().timeserie(since,
+                                                     datetime.datetime.now(),
+                                                     scale='hour')
+
+        axis_data = {'name': 'Timeline',
+                     'values': list(values)}
+        
+        return {'axis': axis_data}
+    

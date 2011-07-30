@@ -4,6 +4,8 @@ For example, using separate hash keys for dates allows to set different expirati
 import datetime
 import calendar
 
+from dateutil import rrule
+
 from collections import namedtuple
 
 from staste import redis
@@ -30,6 +32,37 @@ DATE_SCALES_RANGES = {'month': lambda **t: (1, 12),
                       'hour': lambda **t: (0, 23),
                       'minute': lambda **t: (0, 59)}
 
+DATE_SCALES_RRULE_KWARGS = {'year': {'freq': rrule.YEARLY,
+                                     'bymonthday': 1},
+                           'month': {'freq': rrule.MONTHLY,
+                                     'bymonthday': 1},
+                           'day': {'freq': rrule.DAILY},
+                           'hour': {'freq': rrule.HOURLY},
+                           'minute': {'freq': rrule.MINUTELY}}
+
+
+# can be average
+DATE_SCALES_DELTAS = {'year': datetime.timedelta(days=365),
+                      'month': datetime.timedelta(days=30),
+                      'day': datetime.timedelta(days=1),
+                      'hour': datetime.timedelta(hours=1),
+                      'minute': datetime.timedelta(minutes=1)}
+
+DATE_SCALES_SCALE = {'year': lambda dt: datetime.datetime(dt.year, 1, 1),
+                     'month': lambda dt: datetime.datetime(dt.year,
+                                                           dt.month, 1),
+                     'day': lambda dt: datetime.datetime(year=dt.year,
+                                                         month=dt.month,
+                                                         day=dt.day),
+                     'hour': lambda dt: datetime.datetime(year=dt.year,
+                                                          month=dt.month,
+                                                          day=dt.day,
+                                                          hour=dt.hour),
+                     'minute': lambda dt: datetime.datetime(year=dt.year,
+                                                          month=dt.month,
+                                                          day=dt.day,
+                                                          hour=dt.hour,
+                                                          minute=dt.minute)}
 
 # This is a tuple which is used by Metric.kick()
 # to understand that it should be doing with a scale
@@ -96,8 +129,69 @@ class DateAxis(object):
         
         return xrange(*DATE_SCALES_RANGES[scale](**mv._timespan))
 
-        
 
+    def timeserie(self, since, until, max_scale=None):
+        """Returns a list of time points and scales we can have information about"""
+
+        now = datetime.datetime.now()
+
+        points = []
+        
+        for scale, expiration in reversed(DATE_SCALES_AND_EXPIRATIONS):
+            if max_scale:
+                if scale == max_scale:
+                    max_scale = None
+                else:
+                    continue
+                
+            if expiration:
+                scale_since = now - datetime.timedelta(seconds=expiration)
+
+                if scale_since >= until:
+                    continue
+
+                if scale_since < since:
+                    scale_since = since
+
+            else:
+                scale_since = since
+
+            points = list(self.scale_timeserie(scale, scale_since, until)) + points
+
+            until = scale_since
+
+            if until <= since:
+                break
+
+        for scale, point in points:
+            yield point, ':'.join(self._datetime_to_id_parts(scale, point))
+            
+
+    def scale_timeserie(self, scale, since, until):
+        rr = rrule.rrule(dtstart=since,
+                         until=until,
+                         **DATE_SCALES_RRULE_KWARGS[scale])
+
+        for point in rr:
+            yield scale, self.scale_point(scale, point)
+
+    def scale_point(self, scale, point):
+        return DATE_SCALES_SCALE[scale](point) + DATE_SCALES_DELTAS[scale]/2
+    
+
+    def _datetime_to_id_parts(self, max_scale, dt):
+        id_parts = []
+        
+        for scale, scale_expiration in DATE_SCALES_AND_EXPIRATIONS:
+            val = getattr(dt, scale)
+            id_parts += [scale, str(val)]
+
+            if scale == max_scale:
+                return id_parts
+
+        raise ValueError('Invalid scale: %s' % scale)
+
+    
     def _timespan_to_id_parts(self, **timespan):
         """Converts timespan (a dict of date scales) to a joinable list of id parts.
 

@@ -7,6 +7,16 @@ from staste import redis
 from staste.metrica import Metrica, AveragedMetrica
 from staste.axis import Axis, StoredChoiceAxis
 
+def dtt(*args, **kwargs):
+    return datetime.datetime(*args, **kwargs)
+
+def dtp(**kwargs):
+    return datetime.datetime.now() + datetime.timedelta(**kwargs)
+
+def dtm(**kwargs):
+    return datetime.datetime.now() - datetime.timedelta(**kwargs)
+
+
 class TestStatsApi(TestCase):
     def removeAllKeys(self):
         # be careful.
@@ -26,7 +36,6 @@ class TestStatsApi(TestCase):
         self.removeAllKeys()
         
         settings.STASTE_METRICS_PREFIX = self.old_prefix
-
             
     def testTheSimplestCase(self):
         # so we want to count my guests
@@ -251,3 +260,32 @@ class TestStatsApi(TestCase):
 
         chars = list(metrica.filter().iterate_averages('c'))
         self.assertEquals(chars, [('a', (12+7.5+0.16)/3), ('b', 1.5)])
+        
+    def testNewTimespans(self):
+    
+        metrica = Metrica(name='guest_visits', axes=[])
+
+        my_birthday = datetime.datetime(2011, 2, 7)
+        day = datetime.timedelta(days=1)
+        month = datetime.timedelta(days=31)
+
+        yesterday = my_birthday - day
+        before_yesterday = yesterday - day
+
+        prev_month = my_birthday - month
+        prev_month_and_a_day_back = prev_month - day
+
+        metrica.kick(date=prev_month_and_a_day_back)
+        for i in xrange(2):
+            metrica.kick(date=prev_month)
+            
+        for i in xrange(5):
+            metrica.kick(date=before_yesterday)
+
+        for i in xrange(8):
+            metrica.kick(date=yesterday)
+
+        for i in xrange(20):
+            metrica.kick(date=my_birthday)
+
+        print metrica.values().timeserie(dtt(2006, 1, 1), dtt(2011, 3, 1))

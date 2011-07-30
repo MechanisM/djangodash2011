@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-from staste.charts.views import PieChart, TimelineChart
+from staste.charts.views import PieChart, TimeserieChart
 
 from .views import EmotionView
 from .metrics import gender_age_metrica
@@ -15,6 +15,6 @@ urlpatterns = patterns('',
                            name='gender_pie'),
 
                        url(r'^timeline/$',
-                           TimelineChart.as_view(metrica=gender_age_metrica),
+                           TimeserieChart.as_view(metrica=gender_age_metrica),
                            name='gender_timeline'),
                       )
