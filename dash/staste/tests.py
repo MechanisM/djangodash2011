@@ -57,12 +57,21 @@ class TestStatsApi(TestCase):
 
         # so, how many of them have visited me?
 
-        self.assertEquals(metrica.timespan(year=2006, month=1).value, 3)
-        self.assertEquals(metrica.timespan(year=2006, month=2).value, 33)
-        self.assertEquals(metrica.timespan(year=2006, month=3).value, 0)
-        self.assertEquals(metrica.timespan(year=2006, month=2, day=7).value, 20)
-        self.assertEquals(metrica.timespan(year=2006).value, 36)
+        self.assertEquals(metrica.timespan(year=2006, month=1).total(), 3)
+        self.assertEquals(metrica.timespan(year=2006, month=2).total(), 33)
+        self.assertEquals(metrica.timespan(year=2006).timespan(month=2).total(), 33)
+        self.assertEquals(metrica.timespan(year=2006, month=3).total(), 0)
+        self.assertEquals(metrica.timespan(year=2006, month=2, day=7).total(), 20)
+        self.assertEquals(metrica.timespan(year=2006).total(), 36)
 
         # looks like that
 
+
+        # and also an iterator
+
+        months = list(metrica.timespan(year=2006).iterate())[:3]
+        self.assertEquals(months, [(1, 3), (2, 33), (3, 0)])
             
+
+        years = list(metrica.timespan().iterate())
+        self.assertEquals(years, [(2006, 36)])
