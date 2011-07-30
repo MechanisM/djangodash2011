@@ -3,13 +3,18 @@ import datetime
 from django.test import TestCase
 from django.conf import settings
 
-import staste
-from staste.metrics import Metrica
+from staste import redis
+from staste.metrica import Metrica
+from staste.axis import Axis
 
 class TestStatsApi(TestCase):
-    def removeAllKeys(self):        
-        for k in staste.redis.keys(settings.STASTE_METRICS_PREFIX + '*'):
-            staste.redis.delete(k)
+    def removeAllKeys(self):
+        # be careful.
+
+        assert settings.STASTE_METRICS_PREFIX.endswith('_test')
+        
+        for k in redis.keys(settings.STASTE_METRICS_PREFIX + '*'):
+            redis.delete(k)
 
     def setUp(self):
         self.old_prefix = getattr(settings, 'STASTE_METRICS_PREFIX', 'metrica')
@@ -63,6 +68,8 @@ class TestStatsApi(TestCase):
         self.assertEquals(metrica.timespan(year=2006, month=3).total(), 0)
         self.assertEquals(metrica.timespan(year=2006, month=2, day=7).total(), 20)
         self.assertEquals(metrica.timespan(year=2006).total(), 36)
+        self.assertEquals(metrica.total(), 36)
+                
 
         # looks like that
 
@@ -75,3 +82,51 @@ class TestStatsApi(TestCase):
 
         years = list(metrica.timespan().iterate())
         self.assertEquals(years, [(2006, 36)])
+
+    def testSimpleAxis(self):
+        # so I grew older, and I had learned
+        # how to tell if it's a boy or a girl
+
+        gender_axis = Axis(choices=['boy', 'girl'])
+        metrica = Metrica(name='guest_visits', axes=[('gender', gender_axis)])
+
+        my_birthday = datetime.datetime(2007, 2, 7)
+        # my 15th birthday.
+        # you know what? I hated that year
+
+        
+        day = datetime.timedelta(days=1)
+        month = datetime.timedelta(days=31)
+
+        yesterday = my_birthday - day
+        before_yesterday = yesterday - day
+
+        prev_month = my_birthday - month
+        prev_month_and_a_day_back = prev_month - day
+
+        # my best friend came, we were playing video games
+        metrica.kick(date=prev_month_and_a_day_back, gender='boy')
+        
+        metrica.kick(date=prev_month, gender='girl')
+        metrica.kick(date=prev_month, gender='girl') # I got lucky
+            
+        for i in xrange(5):
+            metrica.kick(date=before_yesterday, gender='boy')
+            # we got really drunk
+
+        for i in xrange(4):
+            metrica.kick(date=yesterday, gender='girl')
+            metrica.kick(date=yesterday, gender='boy')
+            # they came in pairs. I was FOREVER ALONE
+            
+        for i in xrange(18): # all my friends have come
+            metrica.kick(date=my_birthday, gender='boy')
+        for i in xrange(2): # and two girls
+            metrica.kick(date=my_birthday, gender='girl')
+
+        # let's count them!
+        
+        self.assertEquals(metrica.timespan(year=2007).total(), 36)
+        self.assertEquals(metrica.filter(gender='girl').total(), 8)
+        self.assertEquals(metrica.timespan(year=2007, month=2).filter(gender='boy').total(), 27)
+

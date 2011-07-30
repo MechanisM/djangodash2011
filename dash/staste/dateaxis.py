@@ -58,6 +58,9 @@ class DateAxis(object):
         """Returns an string part of the hash key for a timespan
 
         A timespan is a dict of date scales"""
+
+        if not timespan:
+            return '__all__'
         
         id_parts = self._timespan_to_id_parts(**timespan)
 
