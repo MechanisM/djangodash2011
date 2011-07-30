@@ -58,7 +58,7 @@ INSTALLED_APPS = (
 
 SITE_ID = 1
 
-LOGGING = {
+_DISABLED_LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
