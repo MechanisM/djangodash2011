@@ -18,8 +18,7 @@ And a Metrica:
 
 And every time someone comes to your house, you call method `.kick` on your Metrica:
 
-    guests_metrica.kick(date=prev_month,
-                        gender='girl',
+    guests_metrica.kick(gender='girl',
                         age=18)
 
 Okay, fine. Now you can have some stats, like this:
