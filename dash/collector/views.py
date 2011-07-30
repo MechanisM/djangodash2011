@@ -4,12 +4,8 @@ from django.http import HttpResponse, HttpResponsePermanentRedirect
 from django.views.generic import FormView
 from django.utils import simplejson
 
-from staste import redis
-from staste.metrica import Metrica
-from staste.axis import Axis, StoredChoiceAxis
-
 from .forms import ParticipantForm, GENDERS
-
+from .metrics import gender_age_metrica
 
 
 class EmotionView(FormView):
@@ -29,9 +25,7 @@ class EmotionView(FormView):
         return HttpResponsePermanentRedirect('')
         
     def _get_metrica(self):
-        gender_axis = Axis(choices=GENDERS.keys())
-        age_axis = StoredChoiceAxis()
-        return Metrica(name='visitors_gender_and_age', axes=[('gender', gender_axis), ('age', age_axis),])
+        return gender_age_metrica
         
     def get_context_data(self, **kwargs):
         context = super(EmotionView, self).get_context_data(**kwargs)
