@@ -97,6 +97,6 @@ _DISABLED_LOGGING = {
 }
 
 TEST_EXCLUDE = ('django',)
-TEST_RUNNER = '%s.settings.test_suite.AdvancedTestSuiteRunner' % PROJECT_MODULE
+TEST_RUNNER = 'settings.test_suite.AdvancedTestSuiteRunner'
 
 
