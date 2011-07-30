@@ -96,6 +96,7 @@ class Metrica(object):
         Example: mymetric.timespan(year=2011, month=3, day=2)"""
         return self.values().timespan(**kwargs)
 
+    
     def filter(self, **kwargs):
         """Returns a MetricaValues object filtered by one or several axes"""
         return self.values().filter(**kwargs)
@@ -173,6 +174,25 @@ class MetricaValues(object):
     def total(self):
         """Total events count in the subset"""
         return int(redis.hget(self._hash_key, self._hash_field_id) or 0) / self.metrica.multiplier
+
+    def timeserie(self, since, until, scale=None):
+        mult = self.metrica.multiplier
+        prefix = self.metrica.key_prefix()
+
+        ts_points = self.metrica.date_axis.timeserie(since, until, scale)
+
+        points = []
+        pipe = redis.pipeline(transaction=False)
+
+        for point, tp_id in ts_points:
+            points.append(point)
+            
+            hash_key = '%s:%s' % (prefix, tp_id)
+            pipe.hget(hash_key, self._hash_field_id)            
+
+        values = pipe.execute()
+
+        return zip(points, [int(v or 0) / mult for v in values])
 
     def iterate(self, axis=None):
         """Iterates on a MetricaValues set. Returns a list of (key, value) tuples.
