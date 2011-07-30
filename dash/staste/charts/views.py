@@ -2,6 +2,8 @@ from django.views.generic import TemplateView
 
 from staste.dateaxis import DATE_SCALES_AND_EXPIRATIONS
 
+
+
 class Chart(TemplateView):
     metrica = None
 
@@ -26,7 +28,6 @@ class Chart(TemplateView):
     
 class PieChart(Chart):
     template_name = 'staste/charts/pie.html'
-
     axis_keyword = None
 
     def get_context_data(self):
