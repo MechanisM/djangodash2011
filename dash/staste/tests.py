@@ -1,5 +1,8 @@
 from django.test import TestCase
 
+import datetime
+
+from staste.metrics import Metrica
 
 class TestStatsApi(TestCase):
     def testTheSimplestCase(self):
@@ -13,11 +16,11 @@ class TestStatsApi(TestCase):
         day = datetime.timedelta(days=1)
         month = datetime.timedelta(days=31)
 
-        yesterday = n - d
-        before_yesterday = y - d 
+        yesterday = my_birthday - day
+        before_yesterday = yesterday - day
 
-        prev_month = n - m
-        prev_month_and_a_day_back = my - d
+        prev_month = my_birthday - day
+        prev_month_and_a_day_back = prev_month - day
 
         metrica.kick(date=prev_month_and_a_day_back)
         for i in xrange(2):

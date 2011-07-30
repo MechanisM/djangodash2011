@@ -1,1 +1,3 @@
-INSTALLED_APPS += ('staste',)
+from .defaults import *
+
+INSTALLED_APPS += ('dash.staste',)
