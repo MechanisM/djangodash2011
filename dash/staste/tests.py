@@ -4,7 +4,7 @@ from django.test import TestCase
 from django.conf import settings
 
 from staste import redis
-from staste.metrica import Metrica
+from staste.metrica import Metrica, AveragedMetrica
 from staste.axis import Axis, StoredChoiceAxis
 
 class TestStatsApi(TestCase):
@@ -217,3 +217,37 @@ class TestStatsApi(TestCase):
 
         self.assertEquals(metrica.total(), 22.66)
         self.assertEquals(metrica.timespan(year=2010, month=2, day=8).total(), 7.66)
+
+    def testAveragedMetrica(self):
+        axis = Axis(choices=['a', 'b'])
+
+        metrica = AveragedMetrica(name='some_averaged_metrica', axes=[('c', axis)], multiplier=100)
+
+        d1 = datetime.datetime(2010, 2, 7)
+        d2 = datetime.datetime(2010, 2, 8)
+        d3 = datetime.datetime(2010, 2, 9)
+        
+        metrica.kick(date=d1, value=12, c='a')
+        metrica.kick(date=d1, value=2, c='b')
+        metrica.kick(date=d2, value=7.5, c='a')
+        metrica.kick(date=d2, value=0.16, c='a')
+        metrica.kick(date=d3, c='b')
+
+        self.assertEquals(metrica.total(), 22.66)
+        self.assertEquals(metrica.timespan(year=2010, month=2, day=8).total(), 7.66)
+        self.assertEquals(metrica.count(), 5)
+        self.assertEquals(metrica.timespan(year=2010, month=2, day=8).count(), 2)
+        self.assertEquals(metrica.average(), 4.532)
+        self.assertEquals(metrica.timespan(year=2010, month=2, day=8).average(), 3.83)
+
+        days = list(metrica.timespan(year=2010, month=2).iterate_counts())[5:10]
+        self.assertEquals(days, [(6, 0), (7, 2), (8, 2), (9, 1), (10, 0)])
+
+        days = list(metrica.timespan(year=2010, month=2).iterate_averages())[5:10]
+        self.assertEquals(days, [(6, None), (7, 7), (8, 3.83), (9, 1), (10, None)])
+
+        chars = list(metrica.filter().iterate_counts('c'))
+        self.assertEquals(chars, [('a', 3), ('b', 2)])
+
+        chars = list(metrica.filter().iterate_averages('c'))
+        self.assertEquals(chars, [('a', (12+7.5+0.16)/3), ('b', 1.5)])
