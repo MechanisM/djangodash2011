@@ -103,9 +103,18 @@ class MetricaValues(object):
     def iterate(self):
         prefix = self.metrica.key_prefix()
 
+        pipe = redis.pipeline(transaction=False)
+
+        keys = []
+
         for key, tp_id in self.metrica.date_axis.iterate(self):
+            keys.append(key)
+            
             hash_key = '%s:%s' % (prefix, tp_id)
             
-            yield key, int(redis.hget(hash_key, self._hash_field_id) or 0)
+            pipe.hget(hash_key, self._hash_field_id)
+
+        return zip(keys, [int(v or 0) for v in pipe.execute()])
+            
             
         
