@@ -1,0 +1,10 @@
+*~
+*.pyc
+*#
+*#*
+.ropeproject
+*.db
+*.log
+static/media/*
+static/assets/*
+settings/local.py
