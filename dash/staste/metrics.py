@@ -3,7 +3,7 @@ import datetime
 from django.conf import settings
 
 from staste import redis
-from staste.axes import DATE_AXIS
+from staste.dateaxis import DATE_AXIS
 
 class Metrica(object):
     """Metrica is some class of events you want to count, like "site visits".
@@ -90,6 +90,7 @@ class MetricaValues(object):
         
     def timespan(self, **kwargs):
         """Filter by timespan. Returns a new MetricaValues object"""
+        
         tp = dict(self._timespan, **kwargs)
         return MetricaValues(self.metrica, timespan=tp)
 
@@ -101,12 +102,15 @@ class MetricaValues(object):
         return int(redis.hget(self._hash_key, self._hash_field_id) or 0)
 
     def iterate(self):
+        """Iterates on a MetricaValues set. Returns a list of (key, value) tuples.
+
+        If axis is not specified, iterates on the next scale of a date axis. I.e. mymetric.timespan(year=2011).iterate() will iterate months."""
+        
         prefix = self.metrica.key_prefix()
-
-        pipe = redis.pipeline(transaction=False)
-
         keys = []
 
+        pipe = redis.pipeline(transaction=False)
+        
         for key, tp_id in self.metrica.date_axis.iterate(self):
             keys.append(key)
             
@@ -114,7 +118,9 @@ class MetricaValues(object):
             
             pipe.hget(hash_key, self._hash_field_id)
 
-        return zip(keys, [int(v or 0) for v in pipe.execute()])
+        values = pipe.execute()
+
+        return zip(keys, [int(v or 0) for v in values])
             
             
         
