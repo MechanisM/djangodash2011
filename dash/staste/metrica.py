@@ -16,19 +16,23 @@ class Metrica(object):
     Every time the event happens, you call Metrica.kick() function with all the parameters for all axes specified.
     """
 
-    def __init__(self, name, axes):
+    def __init__(self, name, axes, multiplier=None):
         """Constructor of a Metrica
 
         name - should be a unique (among your metrics) string, it will be used in Redis identifiers (lots of them)
-        axes - a list/iterable of tuples: (keyword, staste.axes.Axis object). can be empty"""
+        axes - a list/iterable of tuples: (keyword, staste.axes.Axis object). can be empty
+        multiplier - you multiply all values. it's useful since Redis does not understand floating point increments"""
         self.name = str(name)
         self.axes = list(axes)
         self.date_axis = DATE_AXIS
+        self.multiplier = float(multiplier) if multiplier else 1
+        # don't produce float output in the simple case
         
 
-    def kick(self, date=None, **kwargs):
+    def kick(self, value=1, date=None, **kwargs):
         """Registers an event with parameters (for each of axis)"""
         date = date or datetime.datetime.now()
+        value = int(self.multiplier * value)
         
         hash_key_prefix = self.key_prefix()
 
@@ -36,16 +40,16 @@ class Metrica(object):
         hash_field_id_parts = []
 
         for axis_kw, axis in self.axes:
-            value = kwargs.pop(axis_kw, None)
+            param_value = kwargs.pop(axis_kw, None)
             
             hash_field_id_parts.append(
-                list(axis.get_field_id_parts(value))
+                list(axis.get_field_id_parts(param_value))
                 )
 
             try:
                 if axis.store_choice:
                     set_key = '__choices__:%s' % axis_kw
-                    choices_sets_to_append.append((set_key, value))
+                    choices_sets_to_append.append((set_key, param_value))
             except AttributeError: # 'duck typing'
                 pass
                 
@@ -64,7 +68,7 @@ class Metrica(object):
             for parts in itertools.product(*hash_field_id_parts):
                 hash_field_id = ':'.join(parts)
 
-                pipe.hincrby(hash_key, hash_field_id, 1)
+                pipe.hincrby(hash_key, hash_field_id, value)
             
             if date_scale.expiration:
                 pipe.expire(hash_key, date_scale.expiration)
@@ -72,9 +76,9 @@ class Metrica(object):
             if date_scale.store:
                 choices_sets_to_append.append((date_scale.store, date_scale.value))
 
-        for key, value in choices_sets_to_append:
+        for key, s_value in choices_sets_to_append:
             pipe.sadd('%s:%s' % (hash_key_prefix, key),
-                      value)
+                      s_value)
 
         pipe.execute()
 
@@ -162,7 +166,7 @@ class MetricaValues(object):
 
     def total(self):
         """Total events count in the subset"""
-        return int(redis.hget(self._hash_key, self._hash_field_id) or 0)
+        return int(redis.hget(self._hash_key, self._hash_field_id) or 0) / self.metrica.multiplier
 
     def iterate(self, axis=None):
         """Iterates on a MetricaValues set. Returns a list of (key, value) tuples.
@@ -184,7 +188,7 @@ class MetricaValues(object):
 
         values = pipe.execute()
 
-        return zip(keys, [int(v or 0) for v in values])
+        return zip(keys, [int(v or 0) / self.metrica.multiplier for v in values])
             
 
 
@@ -206,7 +210,7 @@ class MetricaValues(object):
 
         values = pipe.execute()
 
-        return zip(keys, [int(v or 0) for v in values])
+        return zip(keys, [int(v or 0) / self.metrica.multiplier for v in values])
             
             
         

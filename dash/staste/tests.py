@@ -192,7 +192,6 @@ class TestStatsApi(TestCase):
             
 
         # let's count them!
-        
         self.assertEquals(metrica.timespan(year=2010).total(), 37)
         self.assertEquals(metrica.filter(gender='girl').total(), 8)
         self.assertEquals(metrica.filter(gender='girl', age=19).total(), 3)
@@ -202,3 +201,19 @@ class TestStatsApi(TestCase):
         self.assertEquals(set(ages), set([('120', 1), ('19', 0), ('17', 10), ('18', 17)]))
 
 
+
+    def testWeighedMetrics(self):
+        metrica = Metrica(name='some_weighed_metrics', axes=[], multiplier=100)
+
+        d1 = datetime.datetime(2010, 2, 7)
+        d2 = datetime.datetime(2010, 2, 8)
+        d3 = datetime.datetime(2010, 2, 9)
+        
+        metrica.kick(date=d1, value=12)
+        metrica.kick(date=d1, value=2)
+        metrica.kick(date=d2, value=7.5)
+        metrica.kick(date=d2, value=0.16)
+        metrica.kick(date=d3)
+
+        self.assertEquals(metrica.total(), 22.66)
+        self.assertEquals(metrica.timespan(year=2010, month=2, day=8).total(), 7.66)
