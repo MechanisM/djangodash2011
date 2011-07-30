@@ -68,7 +68,7 @@ class Metrica(object):
             for parts in itertools.product(*hash_field_id_parts):
                 hash_field_id = ':'.join(parts)
 
-                pipe.hincrby(hash_key, hash_field_id, value)
+                self._increment(pipe, hash_key, hash_field_id, value)
             
             if date_scale.expiration:
                 pipe.expire(hash_key, date_scale.expiration)
@@ -130,6 +130,12 @@ class Metrica(object):
     def key_for_axis_choices(self, axis_kw):
         return '%s:__choices__:%s' % (self.key_prefix(), axis_kw)
 
+    def _increment(self, pipe, hash_key, hash_field_id, value):
+        pipe.hincrby(hash_key, hash_field_id, value)
+
+    
+
+
 
 
 class MetricaValues(object):
@@ -156,11 +162,11 @@ class MetricaValues(object):
         """Filter by timespan. Returns a new MetricaValues object"""
         
         tp = dict(self._timespan, **kwargs)
-        return MetricaValues(self.metrica, timespan=tp, filter=self._filter)
+        return self.__class__(self.metrica, timespan=tp, filter=self._filter)
 
     def filter(self, **kwargs):
         fl = dict(self._filter, **kwargs)
-        return MetricaValues(self.metrica, timespan=self._timespan, filter=fl)
+        return self.__class__(self.metrica, timespan=self._timespan, filter=fl)
 
     # GETTING VALUES
 
@@ -175,6 +181,9 @@ class MetricaValues(object):
         if not axis:
             return self.iterate_on_dateaxis()
 
+        return self._iterate(axis, self._hash_key, self.metrica.multiplier)
+
+    def _iterate(self, axis, _hash_key, mult):
         axis_object = self.metrica.get_axis(axis)
         keys = axis_object.get_keys(self.metrica.key_for_axis_choices(axis))
 
@@ -184,18 +193,20 @@ class MetricaValues(object):
             fl = dict(self._filter, **{axis: key})
             hash_field_id = self.metrica.hash_field_id(**fl)
             
-            pipe.hget(self._hash_key, hash_field_id)
+            pipe.hget(_hash_key, hash_field_id)
 
         values = pipe.execute()
 
-        return zip(keys, [int(v or 0) / self.metrica.multiplier for v in values])
-            
+        return zip(keys, [int(v or 0) / mult for v in values])
 
 
     def iterate_on_dateaxis(self):
         """Iterates on the next scale of a date axis.
 
         I.e. mymetric.timespan(year=2011).iterate() will iterate months"""
+        return self._iterate_on_dateaxis('', self.metrica.multiplier)
+
+    def _iterate_on_dateaxis(self, _hash_key_postfix, mult):
         prefix = self.metrica.key_prefix()
         keys = []
 
@@ -204,13 +215,60 @@ class MetricaValues(object):
         for key, tp_id in self.metrica.date_axis.iterate(self):
             keys.append(key)
             
-            hash_key = '%s:%s' % (prefix, tp_id)
+            hash_key = '%s:%s' % (prefix, tp_id) + _hash_key_postfix
             
             pipe.hget(hash_key, self._hash_field_id)
 
         values = pipe.execute()
 
-        return zip(keys, [int(v or 0) / self.metrica.multiplier for v in values])
+        return zip(keys, [int(v or 0) / mult for v in values])
             
-            
+
+    
+class AveragedMetrica(Metrica):
+    """AveragedMetrica works like a normal metrica, but also stores counts of the events. So you can ask for .average or .count"""
+    
+    def values(self):
+        """Returns a MetricaValues object for all the data out there"""
+        return AveragedMetricaValues(self)
+
+    def average(self):
+        return self.values().average()
+
+    def count(self):
+        return self.values().count()
+
+    def _increment(self, pipe, hash_key, hash_field_id, value):
+        super(AveragedMetrica, self)._increment(pipe, hash_key, hash_field_id, value)
+        pipe.hincrby('%s:__len__' % hash_key, hash_field_id, 1)
+                
+    
         
+class AveragedMetricaValues(MetricaValues):
+    def average(self):
+        return self.total() / self.count()
+
+    def count(self):
+        return int(redis.hget('%s:__len__' % self._hash_key,
+                              self._hash_field_id) or 0)
+
+    def iterate_counts(self, axis=None):
+        if not axis:
+            return self._iterate_on_dateaxis(':__len__', 1)
+
+        hash_key = '%s:__len__' % self._hash_key
+        
+        return self._iterate(axis, hash_key, 1)
+
+    def iterate_averages(self, axis=None):
+        vals = self.iterate(axis)
+        counts = self.iterate_counts(axis)
+
+        for (k1, v1), (k2, v2) in zip(vals, counts):
+            assert k1 == k2
+
+            if not v2:
+                yield k1, None
+            else:
+                yield k1, v1 / v2
+                             
