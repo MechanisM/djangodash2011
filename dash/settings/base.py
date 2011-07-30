@@ -14,3 +14,5 @@ except ImportError:
     pass
 
 
+DEBUG = True
+TEMPLATE_DEBUG = True
