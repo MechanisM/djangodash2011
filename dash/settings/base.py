@@ -1,6 +1,6 @@
 from defaults import *
 
-INSTALLED_APPS += ('dash.staste',)
+INSTALLED_APPS += ('staste',)
 
 try:
     from local_settings import *

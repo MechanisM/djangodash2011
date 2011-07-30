@@ -32,7 +32,7 @@ STATICFILES_DIRS = (
     root('staticfiles'),
 )
 
-ROOT_URLCONF = '%s.settings.urls' % PROJECT_MODULE
+ROOT_URLCONF = 'settings.urls'
 
 TEMPLATE_DIRS = (
     root('templates'),
