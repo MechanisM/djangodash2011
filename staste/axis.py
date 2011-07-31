@@ -18,7 +18,7 @@ class Axis(object):
 
         return str(value)
 
-    def get_keys(self, key):
+    def get_choices(self, key):
         return self.choices
 
 
@@ -36,5 +36,5 @@ class StoredChoiceAxis(Axis):
     def get_field_id_parts(self, value):
         return ['__all__', str(value)]
 
-    def get_keys(self, key):
+    def get_choices(self, key):
         return redis.smembers(key)

@@ -34,15 +34,26 @@
               title: '{{ title|escapejs }}',
               series: {1: {targetAxisIndex: 1}},
               vAxes:[
-                  {title: 'Requests count'}, // Nothing specified for axis 0
-                  {title: 'Response time, s'} // Axis 1
+                  {title: 'Requests count', 'minValue': 0}, // Nothing specified for axis 0
+                  {title: 'Response time, s', 'minValue': 0} // Axis 1
               ]
           });
+
+          document.getElementById('select_view').onchange = function() {
+              var view = document.getElementById('select_view').value;
+              var scale = '{{ current_scale }}';
+
+              document.location.href = '?view=' + view + '&scale=' + scale;
+          }
       }
-    </script>
+
+      
+      </script>
     <style>
       body { background-color: white; }
-      p { margin-left: 70px; font-size: 0.8em; }
+      p { margin-left: 70px;font-size: 0.8em; float: left; }
+      p#scales {  margin-top: 17px;  }
+      p#views { float: right; margin-right: 120px; }
     </style>
   </head>
 
@@ -53,7 +64,7 @@
     {% if scale == current_scale %}
     <strong>
     {% else %}
-    <a href="?scale={{ scale }}">
+    <a href="?scale={{ scale }}&view={{ current_view }}">
     {% endif %}
     {{ scale }}
     {% if scale == current_scale %}
@@ -63,6 +74,14 @@
     {% endif %}
     {% if not forloop.last %} | {% endif %}
     {% endfor %}
+  </p>
+  <p id="views">View:
+  <select id="select_view">
+    <option value="">=== All views ===</option>
+    {% for view in views %}
+    <option value="{{ view }}" {% if view == current_view %}selected{% endif %}>{{ view }}</option>
+    {% endfor %}
+  </select>
   </p>
   </body>
 </html>

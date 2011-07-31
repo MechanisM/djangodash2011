@@ -15,4 +15,4 @@ class ParticipantForm(forms.Form):
     A simple form to get some simple data.
     """
     gender = forms.ChoiceField(label=_(u'gender'), choices=GENDERS.items())
-    age = forms.IntegerField(label=_(u'age'), max_value=100, min_value=1)
+    age = forms.IntegerField(label=_(u'age'), max_value=100, min_value=1, required=False)

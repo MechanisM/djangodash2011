@@ -1,4 +1,4 @@
-from django.http import HttpResponsePermanentRedirect
+from django.http import HttpResponseRedirect
 from django.views.generic import FormView
 
 from staste import redis

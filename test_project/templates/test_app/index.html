@@ -1,13 +1,14 @@
 <html>
     <head>
       <title>Staste - a slightly complicated event tracking package for your Django webiste, backed by Redis</title>
-      <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script> 
+      <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script>
+      <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
       <style>
         body {
           margin: 0;
           font-family: "Lucida Grande", Verdana, sans-serif;
         }
-        .lighty, .darky {
+        .lighty, .darky, .footer {
           width: 750px;
           margin: 0 auto;
           padding: 0 90px;          
@@ -17,6 +18,9 @@
         }
         .darky {
           background-color: #C9BA94;
+        }
+        .footer {
+          background-color: #ADCFB1;
         }
         .darky p {
           margin-top: 0;
@@ -32,7 +36,13 @@
           margin-left: 25px;
           margin-right: 25px;
         }
-        h3.f {
+        pre {
+          margin-left: 40px;
+          margin-right: 40px;
+          padding-top: 5px;
+          margin-top: 5px;
+        }
+        .f {
           margin-top: 0;
           padding-top: 18px;
         }
@@ -45,12 +55,37 @@
           padding-bottom: 15px;
         }
 
+        
+        p.big {
+          padding-top: 12px;
+          font-size: 1.3em;
+          background-color: #8BBDB3;
+          padding-left: 50px;
+          margin-left: -25px;
+          padding-right: 50px;
+          margin-right: -25px;
+          
+          }
+
+        #id_gender {
+          font-size: 2em;
+        }
+
+        #id_age {
+          width: 100px;
+          font-size: 1.3em;
+        }
+
+        #id_submit {
+          font-size: 30px;
+        }
+
         .buttons {
           padding-top: 9px;
           float: right;
         }
 
-        span.mono {
+        .mono {
           font-family: 'Bitstream Vera Sans Mono', 'Courier', monospace;
           background-color: ghostWhite !important;
           color: #444 !important;
@@ -101,27 +136,85 @@
       </div>
 
       <div class="darky">
-        <form action="" method="post">{% csrf_token %}
-            {{ form.as_p }}
-            <input type="submit" value="Post!" />
+        <form action="" method="post" id="age_gender_form">{% csrf_token %}
+        
+            <p class="big">
+            Select your gender: {{ form.gender }}, and your age: {{ form.age }}             <input id="id_submit" type="submit" value="Ok!" />
+
+            </p>
+        
+
         </form>
 
-        <iframe src="{% url test_app:gender_pie %}" width="400" height="300">
+        <iframe src="{% url test_app:gender_pie %}" width="400" height="300" class='gender_age'>
         </iframe>
 
         
         <iframe src="{% url test_app:requests_pie %}" width="400" height="300">
         </iframe>
 
-        <iframe src="{% url test_app:gender_timeline %}" width="400" height="300">
+        <iframe src="{% url test_app:gender_timeline %}" width="400" height="300" class='gender_age'>
         </iframe>
 
       </div>
 
+      <div class="lighty">
+        <h3 class="f">Instructions</h3>
+
+        <p>First of all, install <strong>Staste</strong> from PyPi:</p>
+
+        <pre class="mono">
+$ pip install staste        </pre>
+
+        <p>Define metrica and its axes (optionally):</p>
+
+        <pre class="mono">
+from staste.metrica import Metrica
+from staste.axis import Axis, StoredChoiceAxis
+          
+gender_axis = Axis(choices=['boy', 'girl']) 
+age_axis = StoredChoiceAxis() 
+
+guests_metrica = Metrica(name='guest_visits_gender_age',
+                         axes=[('gender', gender_axis),
+                               ('age', age_axis)])</pre>
+
+        <p>Metrica is fine as a global variable.</p>
+
+        <p>Now <em>kick</em> it at any event:</p>
+
+        <pre class="mono">guests_metrica.kick(gender='girl', age=18)
+guests_metrica.kick(gender='boy', age=19)</pre>
+
+        <p>That's it! Stats are collecting from now on. Now you can get yourself a cup of tea and <a href="https://github.com/whitescape/djangodash2011">explore</a> how to show them.</p>
+      </div>
+
+      <div class="footer">
+        <p class="f">Brought to you by <a href="http://whitescape.com/">Whitescape</a> at <a href="http://djangodash.com/">DjangoDash 2011</a>. Use on your own risk :-)</p>
+      </div>
+
+
       <script>
-        setInterval(function() {
-          document.getElementById('request_timeserie').contentWindow.location.reload();
-        }, 30000);
+        $(function(){
+          setInterval(function() {
+            document.getElementById('request_timeserie').contentWindow.location.reload();
+          }, 30000);
+
+          var form = $('#age_gender_form');
+          form.submit(function(){
+            $.post(form.attr('action'), form.serialize(),
+                   function() {
+                        $('p', form).html('Saved! Charts are updated.');
+                        $('iframe.gender_age').each(function(){
+                            this.contentWindow.location.reload();
+                        });
+                   });
+            $('p', form).html('Saving...');
+            return false;
+          });
+        });
+
+        
       </script>
         
     </body>
