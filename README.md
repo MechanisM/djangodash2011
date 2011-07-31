@@ -1,28 +1,39 @@
-staste - slightly complicated metrics for your django website
-=============================================================
+Staste - slightly complicated event tracker for your Django website
+===================================================================
 
-Say you want to count your guests. Also you want to aggregate them by genders and ages,and, of course, get a timeline.
+    pip install staste
 
-You define two axes:
+## Quick Start
 
-    gender_axis = Axis(choices=['boy', 'girl'])
-    age_axis = StoredChoiceAxis()
+Say you want to track some event in *real time*, for example count your guests. And you want to count not only all of them, but have different counts by gender and age, and their combinations. Oh, and, of course, you don't want only static counts, you want a timeline.
 
-(`StoredChoice` means that you won't give it all choices in advance)
+You define two Axes and a Metrica:
 
-And a Metrica:
+    gender_axis = Axis(choices=['boy', 'girl']) # preferable if you know all choices possible beforehand
+    age_axis = StoredChoiceAxis() # this one accepts arbitrary values, but will store all of them in a Redis set
 
     guests_metrica = Metrica(name='guest_visits_gender_age',
                              axes=[('gender', gender_axis),
                                    ('age', age_axis)])
 
-And every time someone comes to your house, you call method `.kick` on your Metrica:
+`Axis` is a parameter you'd like to filter your counts on. `Metrica` is an event tracker, collection of counters which you'll increment. So, we have this nice `guests_metrica` metrica for counting our guests.
 
-    guests_metrica.kick(gender='girl',
-                        age=18)
+Every time someone comes to your house, you call this very special method `.kick` on this very `Metrica` object:
 
-Okay, fine. Now you can have some stats, like this:
+    guests_metrica.kick(gender='girl', age=18)
+    guests_metrica.kick(gender='boy', age=19)
 
+That's it. From now on you'll have all necessary data.
+
+## Warning
+
+First of all, never, never ever change axes of your metricas. If you want to add or remove an axis, create a new metrica.
+
+Keep in mind that every new axis in your metrica multiplies quantity of increments per kick by two. This is not going to be an issue for a reasonable amount of axes (2? 3? 5?), because Redis is fast. Oh, it's really fast. You'll never believe. It also does not use too much memory for such simple things like my counters.
+
+## Getting stats
+
+If you want stats in your code, getting them is simple:
 
     >>> metrica.timespan(year=2010).total()
     37
@@ -39,8 +50,6 @@ Okay, fine. Now you can have some stats, like this:
     >>> metrica.timespan(year=2010, month=2).filter(gender='boy').iterate('age')
     [('120', 1), ('19', 0), ('17', 10), ('18', 17)]
 
-
-It's all in Redis. So it's fast and you're the coolest kid in the block.
 
 ## Weighed and averaged metric
 
