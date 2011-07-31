@@ -54,6 +54,44 @@ class TimelineChart(Chart):
 
    
 class TimeserieChart(Chart):
+    """
+    Shows the current metric's chosen axis in the context of the specified time period (from somewhen back untill now).
+    Defining view's class parameters:
+        TimeserieChart.metrica                            - an instance of staste.metrica.Metrica class - 
+                                             specifies the metric the view is dealing with;
+        TimeserieChart.template_name                      - specifies the template the output would be rendered with.
+    Context:
+       {{ axis.name }}                         - the name of presented axis (described below);
+       {{ axis.data }}                         - a dict, where keys are current axis' possible choices and values are lists of tuples
+                                             of time-marked results
+                                             (e.g. {
+                                                    'male':   [
+                                                                (datetime.datetime(2007, 1, 2, 3, 4, 5), 12),
+                                                                (datetime.datetime(2007, 1, 2, 4, 4, 5), 7),
+                                                              ],
+                                                    'female': [
+                                                                (datetime.datetime(2007, 1, 2, 3, 4, 5), 9),
+                                                                (datetime.datetime(2007, 1, 2, 4, 4, 5), 21),
+                                                              ],
+                                                    }
+                                             );
+    Accepts GET-parameters:
+        'show_axis'                        - specifies the metric's axis to present (e.g. '?show_axis=gender'.);
+                                             default = current metric's first axis;
+        a set of '{timescale}__ago' params - where {timescale} in ['year', 'month', 'day', 'hour', 'minute'] - 
+                                             defines a period of time 'ago' for which the results would be aggregated
+                                            (e.g. '?year__ago=2' would provide you with data regarding the past two years);
+        'timescale'                        - a timescale parameter, defines the discreteness of aggregated data
+                                            (e.g. '?timescale=minute' will provide you with 'per-minute' statistic);
+                                            default = 'hour'.
+                                            
+        A full example:
+            http://mysite.com/path_to_this_view/?show_axis=age&day_ago=3&hour_ago=1&timescale=hour
+            will show you frequency of inclision of all visitors' ages over the past 73 hours.
+        
+        Note, that you don't want to use some highly distributed value as 'show_axis' parameter, due to all of those cases would be drawn in your chart and would
+        certainly flood it over.      
+    """
     template_name = 'staste/charts/timeserie.html'
 
     def get_context_data(self):
@@ -80,11 +118,8 @@ class TimeserieChart(Chart):
         
         axis_data = {'name': 'Timeline: %s statistic.' % axis_displayed,
                      'data': values,}
-
         return {'axis': axis_data}
-        
-        
-    
+
 
 class LatestCountAndAverageChart(Chart):
     template_name = 'staste/charts/latest_count_and_average.html'
