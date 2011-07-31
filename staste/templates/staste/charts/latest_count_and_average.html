@@ -34,8 +34,8 @@
               title: '{{ title|escapejs }}',
               series: {1: {targetAxisIndex: 1}},
               vAxes:[
-                  {title: 'Requests count'}, // Nothing specified for axis 0
-                  {title: 'Response time, s'} // Axis 1
+                  {title: 'Requests count', 'minValue': 0}, // Nothing specified for axis 0
+                  {title: 'Response time, s', 'minValue': 0} // Axis 1
               ]
           });
       }
