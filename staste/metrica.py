@@ -82,6 +82,11 @@ class Metrica(object):
 
         pipe.execute()
 
+    def choices(self, axis_kw):
+        return dict(self.axes)[axis_kw].get_choices(
+            self.key_for_axis_choices(axis_kw)
+            )
+
     # STATISTICS
 
     def values(self):
@@ -205,8 +210,7 @@ class MetricaValues(object):
         return self._iterate(axis, self._hash_key, self.metrica.multiplier)
 
     def _iterate(self, axis, _hash_key, mult):
-        axis_object = self.metrica.get_axis(axis)
-        keys = axis_object.get_keys(self.metrica.key_for_axis_choices(axis))
+        keys = self.metrica.choices(axis)
 
         pipe = redis.pipeline(transaction=False)
         

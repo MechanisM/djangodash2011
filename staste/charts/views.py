@@ -136,20 +136,34 @@ class LatestCountAndAverageChart(Chart):
 
     def get_context_data(self):
 
+        # parameters
         scale = self.request.GET.get('scale')
         if scale not in self.scales:
             scale = 'minute'
-        
+
+        views = list(self.metrica.choices('view'))
+            
+        view = self.request.GET.get('view')
+        if view not in views:
+            view = None
+
+
+        # values
         vs = self.metrica.values()
+
+        if view:
+            vs = vs.filter(view=view)
 
         since = datetime.datetime.now() - self.scale_deltas[scale]
 
         data = list(vs.timeserie_counts_and_averages(since,
                                                      datetime.datetime.now(),
                                                      scale=scale))
-
+        
         return {'title': self.title,
                 'axis': {'data': data},
                 'scales': self.scales,
-                'current_scale': scale
+                'current_scale': scale,
+                'views': views,
+                'current_view': view
                 }
