@@ -88,4 +88,12 @@ If you want to calculate averages, you'll need an AveragedMetrica class instead 
     chars = list(metrica.filter().iterate_averages('c'))
     self.assertEquals(chars, [('a', (12+7.5+0.16)/3), ('b', 1.5)])
 
-    
+## Battery included: request logging middleware!
+
+Add 
+
+    'staste.middleware.ResponseTimeMiddleware',
+
+to your middleware classes. Counting requests and average time will start this very instant. They can be aggregated by the view function. [Example][1].
+
+[1]: http://staste.unfoldthat.com/
