@@ -6,6 +6,11 @@ from staste.dateaxis import DATE_SCALES_AND_EXPIRATIONS
 
 
 
+TIMESCALES = dict(DATE_SCALES_AND_EXPIRATIONS).keys()
+
+DEFAULT_TIMESCALE = 'minute'
+
+
 class Chart(TemplateView):
     metrica = None
 
@@ -98,26 +103,45 @@ class TimeserieChart(Chart):
     def get_context_data(self):
         time_until = datetime.datetime.now()
         
-        time_scale = self.request.GET.get('timescale')
-        time_scale = time_scale if time_scale in [i[0] for i in DATE_SCALES_AND_EXPIRATIONS] else 'minute'
+        timescale = self.get_timescale()
+        axis_displayed = self.get_axis_displayed()            
+        time_since = time_until - datetime.timedelta(**self.get_time_since_kwargs())
         
+        values = {}
+        for item in self.get_metrica_values().iterate(axis=axis_displayed):
+            values.update({item[0]: self.get_metrica_values()\
+                                    .filter(**{axis_displayed: item[0]})\
+                                    .timeserie(
+                                                time_since,
+                                                time_until,
+                                                scale=timescale
+                                              )
+                         })
+        axis_data = {'name': 'Timeline: %s statistic.' % axis_displayed,
+                     'data': values,}
+        return {'axis': axis_data}
+        
+    def get_timescale(self):
+        time_scale = self.request.GET.get('timescale')    
+        if time_scale in TIMESCALES:
+            return time_scale        
+        return DEFAULT_TIMESCALE
+        
+    def get_axis_displayed(self):
         axis_displayed = self.request.GET.get('show_axis')
-        axis_displayed = axis_displayed if axis_displayed in [i[0] for i in self.metrica.axes] else self.metrica.axes[0][0]
+        if axis_displayed in dict(self.metrica.axes).keys():
+            return axis_displayed
+        return self.metrica.axes[0][0]
         
-        time_since_kwargs = {'minutes': 5,}
-        for scale, _ in DATE_SCALES_AND_EXPIRATIONS:
+    def get_time_since_kwargs(self):
+        time_since_kwargs = {}
+        for scale in TIMESCALES:
             try:      
                 time_since_for_scale = int(self.request.GET.get('%s__ago' % scale))
                 time_since_kwargs.update({'%ss' % scale: time_since_for_scale})
             except (TypeError, ValueError):
                 pass
-        time_since = time_until - datetime.timedelta(**time_since_kwargs)
-        values = {}
-        for item in self.get_metrica_values().iterate(axis=axis_displayed):
-            values.update({item[0]: self.get_metrica_values().filter(**{axis_displayed: item[0]}).timeserie(time_since, time_until, scale=time_scale)})
-        axis_data = {'name': 'Timeline: %s statistic.' % axis_displayed,
-                     'data': values,}
-        return {'axis': axis_data}
+        return time_since_kwargs or {'%ss' % DEFAULT_TIMESCALE: 5,}
 
 
 class LatestCountAndAverageChart(Chart):

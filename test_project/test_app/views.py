@@ -13,9 +13,7 @@ class IndexView(FormView):
 
     def get_context_data(self, *args, **kwargs):
         data = super(IndexView, self).get_context_data(*args, **kwargs)
-
         data['redis_memory'] = redis.info()['used_memory_human']
-
         return data
       
     def form_valid(self, form):
@@ -23,4 +21,4 @@ class IndexView(FormView):
                             gender=form.cleaned_data['gender'],
                             age=form.cleaned_data['age']
                          )
-        return HttpResponsePermanentRedirect('') 
+        return HttpResponsePermanentRedirect(self.request.META.get('HTTP_REFERER', '/')) 
