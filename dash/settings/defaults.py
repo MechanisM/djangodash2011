@@ -54,7 +54,7 @@ INSTALLED_APPS = (
 
     # internal
     # 'app1',
-    'dash.collector',
+    'dash.test_app',
 )
 
 SITE_ID = 1
