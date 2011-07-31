@@ -9,6 +9,9 @@ Say you want to track some event in *real time*, for example count your guests. 
 
 You define two Axes and a Metrica:
 
+    from staste.metrica import Metrica
+    from staste.axis import Axis, StoredChoiceAxis
+    
     gender_axis = Axis(choices=['boy', 'girl']) # preferable if you know all choices possible beforehand
     age_axis = StoredChoiceAxis() # this one accepts arbitrary values, but will store all of them in a Redis set
 

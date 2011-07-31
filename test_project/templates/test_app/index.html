@@ -169,6 +169,9 @@ $ pip install staste        </pre>
         <p>Define metrica and its axes (optionally):</p>
 
         <pre class="mono">
+from staste.metrica import Metrica
+from staste.axis import Axis, StoredChoiceAxis
+          
 gender_axis = Axis(choices=['boy', 'girl']) 
 age_axis = StoredChoiceAxis() 
 
