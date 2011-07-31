@@ -53,8 +53,7 @@ INSTALLED_APPS = (
     'south',
 
     # internal
-    # 'app1',
-    'collector',
+    'dash.test_app',
 )
 
 SITE_ID = 1

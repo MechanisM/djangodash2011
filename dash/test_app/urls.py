@@ -3,12 +3,12 @@ from django.conf.urls.defaults import *
 from staste.charts.views import PieChart, TimeserieChart
 from staste.middleware import response_time_metrica
 
-from .views import EmotionView
+from .views import IndexView
 from .metrics import gender_age_metrica
 
 
 urlpatterns = patterns('',
-                       url(r'^$', EmotionView.as_view(), name="index"),
+                       url(r'^$', IndexView.as_view(), name="index"),
 
                        url(r'^pie/$',
                            PieChart.as_view(metrica=gender_age_metrica,
