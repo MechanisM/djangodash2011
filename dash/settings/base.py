@@ -2,6 +2,8 @@ from defaults import *
 
 INSTALLED_APPS += ('staste',)
 
+STASTE_METRICS_PREFIX = 'staste'
+
 try:
     from local_settings import *
     
@@ -16,3 +18,12 @@ except ImportError:
 
 DEBUG = True
 TEMPLATE_DEBUG = True
+
+
+MIDDLEWARE_CLASSES = (
+    'staste.middleware.ResponseTimeMiddleware',
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',)

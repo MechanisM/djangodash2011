@@ -26,9 +26,20 @@
             {{ form.as_p }}
             <input type="submit" value="Post!" />
         </form>
-        <div id="chart_div"></div>
 
         <iframe src="{% url collector:gender_pie %}" width="400" height="300">
         </iframe>
+
+        
+        <iframe src="{% url collector:requests_pie %}" width="400" height="300">
+        </iframe>
+
+        <iframe src="{% url collector:gender_timeline %}" width="400" height="300">
+        </iframe>
+
+        <iframe src="{% url collector:requests_timeserie %}" width="400" height="300">
+        </iframe>
+
+        
     </body>
 </html>

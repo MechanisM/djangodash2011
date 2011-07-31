@@ -82,4 +82,6 @@ class TimeserieChart(Chart):
                      'data': values,}
 
         return {'axis': axis_data}
+        
+        
     

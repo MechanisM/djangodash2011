@@ -53,53 +53,13 @@ INSTALLED_APPS = (
     'south',
 
     # internal
-    # 'app1',
     'dash.test_app',
 )
 
 SITE_ID = 1
 
-_DISABLED_LOGGING = {
-    'version': 1,
-    'disable_existing_loggers': False,
-    'formatters': {
-        'verbose': {
-            'format': ('%(levelname)s %(asctime)s |'
-                       ' %(pathname)s:%(lineno)d (in %(funcName)s) |'
-                       ' %(message)s ')
-        },
-        'simple': {
-            'format': '%(levelname)s %(message)s'
-        },
-    },
-    'handlers': {
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler'
-        },
-        'logfile': {
-            'level': 'DEBUG',
-            'class': 'logging.handlers.WatchedFileHandler',
-            'filename': root('%s.log' % PROJECT_MODULE),
-            'formatter': 'verbose',
-        },
-    },
-    'loggers': {
-        'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': True,
-        },
-        PROJECT_MODULE: {
-            'handlers': ['logfile'],
-            'level': 'DEBUG'
-        }
-    }
-}
-
 TEST_EXCLUDE = ('django',)
 TEST_RUNNER = 'settings.test_suite.AdvancedTestSuiteRunner'
 
-STASTE_METRICS_PREFIX = ''
 
 
