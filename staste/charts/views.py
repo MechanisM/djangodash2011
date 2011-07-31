@@ -81,9 +81,10 @@ class TimeserieChart(Chart):
         a set of '{timescale}__ago' params - where {timescale} in ['year', 'month', 'day', 'hour', 'minute'] - 
                                              defines a period of time 'ago' for which the results would be aggregated
                                             (e.g. '?year__ago=2' would provide you with data regarding the past two years);
+                                            default is 5 minutes;
         'timescale'                        - a timescale parameter, defines the discreteness of aggregated data
                                             (e.g. '?timescale=minute' will provide you with 'per-minute' statistic);
-                                            default = 'hour'.
+                                            default = 'minute'.
                                             
         A full example:
             http://mysite.com/path_to_this_view/?show_axis=age&day_ago=3&hour_ago=1&timescale=hour
@@ -98,24 +99,22 @@ class TimeserieChart(Chart):
         time_until = datetime.datetime.now()
         
         time_scale = self.request.GET.get('timescale')
-        time_scale = time_scale if time_scale in [i[0] for i in DATE_SCALES_AND_EXPIRATIONS] else 'hour'
+        time_scale = time_scale if time_scale in [i[0] for i in DATE_SCALES_AND_EXPIRATIONS] else 'minute'
         
         axis_displayed = self.request.GET.get('show_axis')
         axis_displayed = axis_displayed if axis_displayed in [i[0] for i in self.metrica.axes] else self.metrica.axes[0][0]
         
-        time_since_kwargs = {}
+        time_since_kwargs = {'minutes': 5,}
         for scale, _ in DATE_SCALES_AND_EXPIRATIONS:
             try:      
                 time_since_for_scale = int(self.request.GET.get('%s__ago' % scale))
                 time_since_kwargs.update({'%ss' % scale: time_since_for_scale})
-            except TypeError:
+            except (TypeError, ValueError):
                 pass
         time_since = time_until - datetime.timedelta(**time_since_kwargs)
-     
         values = {}
         for item in self.get_metrica_values().iterate(axis=axis_displayed):
             values.update({item[0]: self.get_metrica_values().filter(**{axis_displayed: item[0]}).timeserie(time_since, time_until, scale=time_scale)})
-        
         axis_data = {'name': 'Timeline: %s statistic.' % axis_displayed,
                      'data': values,}
         return {'axis': axis_data}
