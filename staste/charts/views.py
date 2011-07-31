@@ -8,7 +8,7 @@ from staste.dateaxis import DATE_SCALES_AND_EXPIRATIONS
 
 TIMESCALES = ['day', 'hour', 'minute']
 
-DEFAULT_TIMESCALE = 'minute'
+DEFAULT_TIMESCALE = 'hour'
 
 
 class Chart(TemplateView):
@@ -85,11 +85,11 @@ class TimeserieChart(Chart):
                                              default = current metric's first axis;
         a set of '{timescale}__ago' params - where {timescale} in ['year', 'month', 'day', 'hour', 'minute'] - 
                                              defines a period of time 'ago' for which the results would be aggregated
-                                            (e.g. '?year__ago=2' would provide you with data regarding the past two years);
+                                            (e.g. '?day__ago=2' would provide you with data regarding the past two years);
                                             default is 5 minutes;
         'timescale'                        - a timescale parameter, defines the discreteness of aggregated data
                                             (e.g. '?timescale=minute' will provide you with 'per-minute' statistic);
-                                            default = 'minute'.
+                                            default = 'hour'.
         'hide_total'                       - defines if the 'total' value over all choices is concealed.
         'clean_date'                       - defines the format of chart dateaxis points annotation (e.g. "7 hrs ago" or "5th Jan 2007");
                                              minute is the smallest unit to show.
