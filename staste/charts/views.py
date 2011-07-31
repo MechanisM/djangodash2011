@@ -90,6 +90,7 @@ class TimeserieChart(Chart):
         'timescale'                        - a timescale parameter, defines the discreteness of aggregated data
                                             (e.g. '?timescale=minute' will provide you with 'per-minute' statistic);
                                             default = 'minute'.
+        'hide_total'                       - defines if the 'total' value over all choices is concealed.
                                             
         A full example:
             http://mysite.com/path_to_this_view/?show_axis=age&day_ago=3&hour_ago=1&timescale=hour
@@ -100,23 +101,11 @@ class TimeserieChart(Chart):
     """
     template_name = 'staste/charts/timeserie.html'
 
-    def get_context_data(self):
-        time_until = datetime.datetime.now()
+    def get_context_data(self):       
+        axis_displayed = self.get_axis_displayed()  
         
-        timescale = self.get_timescale()
-        axis_displayed = self.get_axis_displayed()            
-        time_since = time_until - datetime.timedelta(**self.get_time_since_kwargs())
+        values = self.get_timeserie(axis_displayed)
         
-        values = {}
-        for item in self.get_metrica_values().iterate(axis=axis_displayed):
-            values.update({item[0]: self.get_metrica_values()\
-                                    .filter(**{axis_displayed: item[0]})\
-                                    .timeserie(
-                                                time_since,
-                                                time_until,
-                                                scale=timescale
-                                              )
-                         })
         axis_data = {'name': 'Timeline: %s statistic.' % axis_displayed,
                      'data': values,}
         return {'axis': axis_data}
@@ -142,6 +131,23 @@ class TimeserieChart(Chart):
             except (TypeError, ValueError):
                 pass
         return time_since_kwargs or {'%ss' % DEFAULT_TIMESCALE: 5,}
+        
+    def get_timeserie(self, axis_displayed):
+        time_until = datetime.datetime.now()
+        timeserie_params = {                            
+                            'since': time_until - datetime.timedelta(**self.get_time_since_kwargs()),
+                            'until': time_until,
+                            'scale': self.get_timescale(),  
+                           }
+       
+        values = {}
+        if not self.request.GET.get('hide_total', False):
+            values.update({'total': self.get_metrica_values().timeserie(**timeserie_params)})
+        for item in self.get_metrica_values().iterate(axis=axis_displayed):
+            values.update({item[0]: self.get_metrica_values()\
+                                    .filter(**{axis_displayed: item[0]})\
+                                    .timeserie(**timeserie_params)})
+        return values
 
 
 class LatestCountAndAverageChart(Chart):
