@@ -1,1 +1,4 @@
 .vagrant
+dist/
+build/
+staste.egg-info/
