@@ -2,3 +2,5 @@
 dist/
 build/
 staste.egg-info/
+MANIFEST
+dump.rdb
