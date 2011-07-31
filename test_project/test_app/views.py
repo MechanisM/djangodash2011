@@ -1,4 +1,4 @@
-from django.http import HttpResponsePermanentRedirect
+from django.http import HttpResponseRedirect
 from django.views.generic import FormView
 
 from staste import redis
@@ -23,4 +23,4 @@ class IndexView(FormView):
                             gender=form.cleaned_data['gender'],
                             age=form.cleaned_data['age']
                          )
-        return HttpResponsePermanentRedirect('') 
+        return HttpResponseRedirect('') 
