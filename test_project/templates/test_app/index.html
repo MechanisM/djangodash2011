@@ -49,6 +49,14 @@
           padding-top: 9px;
           float: right;
         }
+
+        span.mono {
+          font-family: 'Bitstream Vera Sans Mono', 'Courier', monospace;
+          background-color: ghostWhite !important;
+          color: #444 !important;
+          padding: 0 .2em !important;
+          border: 1px solid #DEDEDE !important;
+        }
         
       </style>
     </head>
@@ -91,6 +99,7 @@
 
         <p><a href="">Reload the page</a> several times.</p>
         <p>You'll see how the chart is changing, showing your own actions in real time!</p>
+        <p>By the way, for all of these stats Redis uses just <span class="mono">{{ redis_memory }}</span> of RAM!</p>
 
 
       </div>
