@@ -28,9 +28,49 @@
                     chart.draw(data, {width: document.width - 30, height: window.innerHeight - 30, title: '{{ axis.name|escapejs }}'});
             }
         </script>
+        
+        <style>
+              body { background-color: white; }
+              p { margin-left: 70px;font-size: 0.8em; float: left; }
+              p#scales {  margin-top: 17px;  }
+              p#axes { float: right; margin-right: 120px; }
+        </style>
     </head>
 
     <body>  
+    
         <div id="chart_div"></div>
+        <p id="scales">Scale: 
+            {% for scale in scales %}
+                {% if scale == current_scale %}
+                    <strong>
+                {% else %}
+                    <a href="?timescale={{ scale }}&show_axis={{ current_axis }}&{{ time_since_params }}">
+                {% endif %}
+                {{ scale }}
+                {% if scale == current_scale %}
+                    </strong>
+                {% else %}
+                    </a>
+                {% endif %}
+                {% if not forloop.last %} | {% endif %}
+            {% endfor %}
+        </p>
+        <p id="axes">Axis: 
+            {% for a in axes %}
+                {% if a == current_axis %}
+                    <strong>
+                {% else %}
+                    <a href="?show_axis={{ a }}&timescale={{ current_scale }}&{{ time_since_params }}">
+                {% endif %}
+                {{ a }}
+                {% if a == current_axis %}
+                    </strong>
+                {% else %}
+                    </a>
+                {% endif %}
+                {% if not forloop.last %} | {% endif %}
+            {% endfor %}
+        </p>
     </body>
 </html>

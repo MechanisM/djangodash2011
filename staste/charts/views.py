@@ -6,7 +6,7 @@ from staste.dateaxis import DATE_SCALES_AND_EXPIRATIONS
 
 
 
-TIMESCALES = dict(DATE_SCALES_AND_EXPIRATIONS).keys()
+TIMESCALES = ['day', 'hour', 'minute']
 
 DEFAULT_TIMESCALE = 'minute'
 
@@ -112,7 +112,16 @@ class TimeserieChart(Chart):
         
         axis_data = {'name': 'Timeline: %s statistic.' % axis_displayed,
                      'data': values,}
-        return {'axis': axis_data, 'clean_date': clean_date,}
+                     
+        return {
+                'axis': axis_data,
+                'axes': dict(self.metrica.axes).keys(),
+                'current_axis': axis_displayed,
+                'clean_date': clean_date,
+                'scales': TIMESCALES,
+                'current_scale': self.timescale,
+                'time_since_params': '&'.join(['%s__ago=%i' % (k[:-1], v) for k, v in self.time_since_kwargs.items()]),
+                }
         
     def get_timescale(self):
         time_scale = self.request.GET.get('timescale')    
@@ -134,22 +143,24 @@ class TimeserieChart(Chart):
                 time_since_kwargs.update({'%ss' % scale: time_since_for_scale})
             except (TypeError, ValueError):
                 pass
-        return time_since_kwargs or {'%ss' % DEFAULT_TIMESCALE: 5,}
+        return time_since_kwargs or {'%ss' % self.timescale: 5,}
         
     def get_timeserie(self, axis_displayed):
         time_until = datetime.datetime.now()
+        self.timescale = self.get_timescale()
+        self.time_since_kwargs = self.get_time_since_kwargs()
         timeserie_params = {                            
-                            'since': time_until - datetime.timedelta(**self.get_time_since_kwargs()),
+                            'since': time_until - datetime.timedelta(**self.time_since_kwargs),
                             'until': time_until,
-                            'scale': self.get_timescale(),  
+                            'scale': self.timescale,  
                            }
        
         values = {}
         if not self.request.GET.get('hide_total', False):
             values.update({'total': self.get_metrica_values().timeserie(**timeserie_params)})
-        for item in self.get_metrica_values().iterate(axis=axis_displayed):
-            values.update({item[0]: self.get_metrica_values()\
-                                    .filter(**{axis_displayed: item[0]})\
+        for item in self.metrica.choices(axis_displayed):
+            values.update({item: self.get_metrica_values()\
+                                    .filter(**{axis_displayed: item})\
                                     .timeserie(**timeserie_params)})
         return values
 
