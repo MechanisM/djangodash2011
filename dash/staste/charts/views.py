@@ -57,7 +57,7 @@ class TimeserieChart(Chart):
     def get_context_data(self):
         since = datetime.datetime.now() - datetime.timedelta(hours=4)
         
-        values = self.get_metrica_values().timeserie_averages(since,
+        values = self.get_metrica_values().timeserie(since,
                                                      datetime.datetime.now(),
                                                      scale='minute')
 

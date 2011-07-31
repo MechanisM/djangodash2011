@@ -1,27 +1,93 @@
 <html>
     <head>
-        <script type="text/javascript" src="https://www.google.com/jsapi"></script>
-        <script type="text/javascript">
-            google.load("visualization", "1", {packages:["corechart"]});
-            google.setOnLoadCallback(drawChart);
-            function drawChart() {
-                var data = new google.visualization.DataTable();
-                data.addColumn('string', 'Year');
-                data.addColumn('number', 'Male');
-                data.addColumn('number', 'Female');
-                data.addColumn('number', 'Other'); 
-
-                {% for point in genders %}
-                    data.addRow(["{{ point.0 }}", {{ point.1 }}, {{ point.2 }}, {{ point.3 }}]);
-                {% endfor %}
-                var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-                chart.draw(data, {width: 400, height: 240, title: 'Company Performance'});
-              }
-        </script>
+      <title>Staste - a slightly complicated event tracking package for your Django webiste, backed by Redis</title>
+      <script type="text/javascript" src="https://apis.google.com/js/plusone.js"></script> 
+      <style>
+        body {
+          margin: 0;
+          font-family: "Lucida Grande", Verdana, sans-serif;
+        }
+        #first_part, #second_part {
+          width: 750px;
+          margin: 0 auto;
+          padding: 0 90px;          
+        }
+        #first_part {
+          background-color: #F2ECC1;
+        }
+        #second_part {
+          background-color: #C9BA94;
+        }
+        #second_part p {
+          margin-top: 0;
+        }
+        h1 {
+          margin: 0 auto;
+          width: 700px;
+          padding: 10px 115px;
+          font-size: 2em;
+          background-color: #D1DEBD;
+        }
+        h3 {
+          margin-left: 25px;
+          margin-right: 25px;
+        }
+        h3.f {
+          margin-top: 0;
+          padding-top: 18px;
+        }
+        iframe {
+          border: 0;
+        }
+        #buttons {
+          position: fixed;
+   bottom: 0px;
+   right: 140px;
+   width: 140px;
+   background: white;
+   margin-bottom: 0px;
+   padding: 14px;
+}
+      </style>
     </head>
 
     <body>
-    <br />{{ ages }}
+
+      <p id="buttons"> 
+      <table> 
+        <tr> 
+          <td> 
+        <a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="valyagolev">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script> 
+          </td> 
+          <td> 
+ 
+        <g:plusone size="medium"></g:plusone> 
+          </td> 
+ 
+          <td> 
+        <iframe src="http://www.facebook.com/plugins/like.php?href=http://unfoldthat.com/index.html&send=false&amp;layout=button_count&amp;width=450&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font=lucida+grande&amp;height=21" scrolling="no" frameborder="0" style="display: inline; float: right; border:none; overflow:hidden; width: 90px; height:21px;" allowTransparency="true"></iframe> 
+          </td> 
+        </tr> 
+      </table> 
+      </p> 
+
+      <h1>Staste</h1>
+
+      <div id="first_part">
+
+      <h3 class="f">Slightly complicated event tracker for your Django website.</h3>
+      <h3>Fast. Free. Real-time. On your server. Backed by <a href="http://redis.io">Redis</a>.</h3>
+      
+      
+   
+
+        <iframe src="{% url collector:requests_timeserie %}" width="750" height="300">
+        </iframe>
+
+
+      </div>
+
+      <div id="second_part">
         <form action="" method="post">{% csrf_token %}
             {{ form.as_p }}
             <input type="submit" value="Post!" />
@@ -37,9 +103,7 @@
         <iframe src="{% url collector:gender_timeline %}" width="400" height="300">
         </iframe>
 
-        <iframe src="{% url collector:requests_timeserie %}" width="400" height="300">
-        </iframe>
-
+      </div>
         
     </body>
 </html>
