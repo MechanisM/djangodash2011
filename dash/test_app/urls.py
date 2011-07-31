@@ -1,6 +1,6 @@
 from django.conf.urls.defaults import *
 
-from staste.charts.views import PieChart, TimeserieChart
+from staste.charts.views import PieChart, TimeserieChart, LatestCountAndAverageChart
 from staste.middleware import response_time_metrica
 
 from .views import IndexView
@@ -25,6 +25,7 @@ urlpatterns = patterns('',
                           name='requests_pie'),
 
                        url(r'^requests/$',
-                           TimeserieChart.as_view(metrica=response_time_metrica),
+                           LatestCountAndAverageChart.as_view(metrica=response_time_metrica,
+                                                              title='Requests count and average response time'),
                            name='requests_timeserie')
                       )

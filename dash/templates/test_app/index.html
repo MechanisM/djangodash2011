@@ -28,7 +28,7 @@
           font-size: 2em;
           background-color: #D1DEBD;
         }
-        h3 {
+        h3, p {
           margin-left: 25px;
           margin-right: 25px;
         }
@@ -39,22 +39,29 @@
         iframe {
           border: 0;
         }
-        #buttons {
-          position: fixed;
-   bottom: 0px;
-   right: 140px;
-   width: 140px;
-   background: white;
-   margin-bottom: 0px;
-   padding: 14px;
-}
+        p {
+          margin-bottom: 0;
+          margin-top: 5px;
+          padding-bottom: 15px;
+        }
+
+        .buttons {
+          padding-top: 9px;
+          float: right;
+        }
+        
       </style>
     </head>
 
     <body>
 
       <p id="buttons"> 
-      <table> 
+       
+      </p> 
+
+      <h1>Staste
+
+      <table class="buttons"> 
         <tr> 
           <td> 
         <a href="http://twitter.com/share" class="twitter-share-button" data-count="horizontal" data-via="valyagolev">Tweet</a><script type="text/javascript" src="http://platform.twitter.com/widgets.js"></script> 
@@ -68,10 +75,8 @@
         <iframe src="http://www.facebook.com/plugins/like.php?href=http://unfoldthat.com/index.html&send=false&amp;layout=button_count&amp;width=450&amp;show_faces=false&amp;action=like&amp;colorscheme=light&amp;font=lucida+grande&amp;height=21" scrolling="no" frameborder="0" style="display: inline; float: right; border:none; overflow:hidden; width: 90px; height:21px;" allowTransparency="true"></iframe> 
           </td> 
         </tr> 
-      </table> 
-      </p> 
-
-      <h1>Staste</h1>
+      </table>
+      </h1>
 
       <div id="first_part">
 
@@ -81,8 +86,11 @@
       
    
 
-        <iframe src="{% url collector:requests_timeserie %}" width="750" height="300">
+        <iframe src="{% url test_app:requests_timeserie %}" width="750" height="300">
         </iframe>
+
+        <p><a href="">Reload the page</a> several times.</p>
+        <p>You'll see how the chart is changing, showing your own actions in real time!</p>
 
 
       </div>
@@ -93,14 +101,14 @@
             <input type="submit" value="Post!" />
         </form>
 
-        <iframe src="{% url collector:gender_pie %}" width="400" height="300">
+        <iframe src="{% url test_app:gender_pie %}" width="400" height="300">
         </iframe>
 
         
-        <iframe src="{% url collector:requests_pie %}" width="400" height="300">
+        <iframe src="{% url test_app:requests_pie %}" width="400" height="300">
         </iframe>
 
-        <iframe src="{% url collector:gender_timeline %}" width="400" height="300">
+        <iframe src="{% url test_app:gender_timeline %}" width="400" height="300">
         </iframe>
 
       </div>

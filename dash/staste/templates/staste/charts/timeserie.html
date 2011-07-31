@@ -25,7 +25,7 @@
                     {% endfor %}
                     
                     var chart = new google.visualization.LineChart(document.getElementById('chart_div'));
-                    chart.draw(data, {width: document.width - 30, height: document.height - 30, title: '{{ axis.name|escapejs }}'});
+                    chart.draw(data, {width: document.width - 30, height: window.innerHeight - 30, title: '{{ axis.name|escapejs }}'});
             }
         </script>
     </head>

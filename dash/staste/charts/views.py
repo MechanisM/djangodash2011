@@ -85,3 +85,19 @@ class TimeserieChart(Chart):
         
         
     
+
+class LatestCountAndAverageChart(Chart):
+    template_name = 'staste/charts/latest_count_and_average.html'
+
+    title = 'Counts and Averages'
+
+    def get_context_data(self):
+        vs = self.metrica.values()
+
+        since = datetime.datetime.now() - datetime.timedelta(hours=1)
+
+        data = list(vs.timeserie_counts_and_averages(since,
+                                                     datetime.datetime.now()))
+
+        return {'title': self.title,
+                'axis': {'data': data}}
