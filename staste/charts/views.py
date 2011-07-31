@@ -91,6 +91,8 @@ class TimeserieChart(Chart):
                                             (e.g. '?timescale=minute' will provide you with 'per-minute' statistic);
                                             default = 'minute'.
         'hide_total'                       - defines if the 'total' value over all choices is concealed.
+        'clean_date'                       - defines the format of chart dateaxis points annotation (e.g. "7 hrs ago" or "5th Jan 2007");
+                                             minute is the smallest unit to show.
                                             
         A full example:
             http://mysite.com/path_to_this_view/?show_axis=age&day_ago=3&hour_ago=1&timescale=hour
@@ -106,9 +108,11 @@ class TimeserieChart(Chart):
         
         values = self.get_timeserie(axis_displayed)
         
+        clean_date = self.request.GET.get('clean_date', False) != False
+        
         axis_data = {'name': 'Timeline: %s statistic.' % axis_displayed,
                      'data': values,}
-        return {'axis': axis_data}
+        return {'axis': axis_data, 'clean_date': clean_date,}
         
     def get_timescale(self):
         time_scale = self.request.GET.get('timescale')    

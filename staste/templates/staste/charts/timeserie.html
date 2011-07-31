@@ -15,7 +15,7 @@
                     data.addRows({{ axis.data.values.0|length }});
                     
                     {% for timepoint in axis.data.values.0 %}
-                        data.setValue({{ forloop.counter0 }}, 0, '{{ timepoint.0 }}');
+                        data.setValue({{ forloop.counter0 }}, 0, {% if not clean_date %}'{{ timepoint.0|timesince }} ago'{% else %}'{{ timepoint.0 }}'{% endif %});
                     {% endfor %}
                                        
                    {% for value in axis.data.values %}   

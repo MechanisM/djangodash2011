@@ -21,4 +21,4 @@ class IndexView(FormView):
                             gender=form.cleaned_data['gender'],
                             age=form.cleaned_data['age']
                          )
-        return HttpResponsePermanentRedirect(self.request.META.get('HTTP_REFERER', '/')) 
+        return HttpResponseRedirect(self.request.META.get('HTTP_REFERER', '/')) 
