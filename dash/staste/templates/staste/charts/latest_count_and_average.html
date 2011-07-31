@@ -30,7 +30,7 @@
           var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
           chart.draw(data, {
               width: document.width - 30,
-              height: window.innerHeight - 30,
+              height: window.innerHeight - 60,
               title: '{{ title|escapejs }}',
               series: {1: {targetAxisIndex: 1}},
               vAxes:[
@@ -40,9 +40,29 @@
           });
       }
     </script>
+    <style>
+      body { background-color: white; }
+      p { margin-left: 70px; font-size: 0.8em; }
+    </style>
   </head>
 
   <body>
     <div id="chart_div"></div>
+    <p id="scales">Scale: 
+    {% for scale in scales %}
+    {% if scale == current_scale %}
+    <strong>
+    {% else %}
+    <a href="?scale={{ scale }}">
+    {% endif %}
+    {{ scale }}
+    {% if scale == current_scale %}
+  </strong>
+    {% else %}
+    </a>
+    {% endif %}
+    {% if not forloop.last %} | {% endif %}
+    {% endfor %}
+  </p>
   </body>
 </html>

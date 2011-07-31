@@ -91,13 +91,31 @@ class LatestCountAndAverageChart(Chart):
 
     title = 'Counts and Averages'
 
+    scales = [#'year', 'month', 'day',
+        'hour', 'minute']
+
+    scale_deltas = {'year': datetime.timedelta(days=365*5),
+                    'month': datetime.timedelta(days=730),
+                    'day': datetime.timedelta(days=31),
+                    'hour': datetime.timedelta(days=2),
+                    'minute': datetime.timedelta(minutes=30)}
+
     def get_context_data(self):
+
+        scale = self.request.GET.get('scale')
+        if scale not in self.scales:
+            scale = 'minute'
+        
         vs = self.metrica.values()
 
-        since = datetime.datetime.now() - datetime.timedelta(hours=1)
+        since = datetime.datetime.now() - self.scale_deltas[scale]
 
         data = list(vs.timeserie_counts_and_averages(since,
-                                                     datetime.datetime.now()))
+                                                     datetime.datetime.now(),
+                                                     scale=scale))
 
         return {'title': self.title,
-                'axis': {'data': data}}
+                'axis': {'data': data},
+                'scales': self.scales,
+                'current_scale': scale
+                }
