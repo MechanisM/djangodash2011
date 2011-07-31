@@ -179,7 +179,7 @@ class LatestCountAndAverageChart(Chart):
             
         view = self.request.GET.get('view')
         if view not in views:
-            view = None
+            view = ''
 
 
         # values
