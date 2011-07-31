@@ -91,6 +91,21 @@ If you want to calculate averages, you'll need an AveragedMetrica class instead 
     chars = list(metrica.filter().iterate_averages('c'))
     self.assertEquals(chars, [('a', (12+7.5+0.16)/3), ('b', 1.5)])
 
+## Nice charts
+
+You have probably seen nice charts on the [Staste page][1]. Well, you can show them, using these very special generic views at `staste.charts.views`. Just add them to your urlconf like this:
+
+    PieChart.as_view(metrica=gender_age_metrica,
+                     axis_keyword='gender'),
+
+Actually, these were made in hurry during the DjangoDash, 
+
+## How does it work?
+
+It has a lot of counters in Redis, and each time you kick a metrica, it bumps some of them. That simple.
+
+Actually, not that simple. The algorithm uses `itertools.product()`. I've never used things like that for anything apart from puzzles (like ones at [Project Euler][2]).
+
 ## Battery included: request logging middleware!
 
 Add 
@@ -100,3 +115,4 @@ Add
 to your middleware classes. Counting requests and average time will start this very instant. They can be aggregated by the view function. [Example][1].
 
 [1]: http://staste.unfoldthat.com/
+[2]: http://projecteuler.net/
