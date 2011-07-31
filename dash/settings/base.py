@@ -1,6 +1,7 @@
 from defaults import *
 
-INSTALLED_APPS += ('staste',)
+INSTALLED_APPS += ('staste',
+                   'test_app')
 
 STASTE_METRICS_PREFIX = 'staste'
 
