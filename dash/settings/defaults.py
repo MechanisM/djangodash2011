@@ -52,8 +52,6 @@ INSTALLED_APPS = (
     # external
     'south',
 
-    # internal
-    'dash.test_app',
 )
 
 SITE_ID = 1

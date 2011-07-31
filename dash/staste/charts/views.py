@@ -57,9 +57,9 @@ class TimeserieChart(Chart):
     """
     Shows the current metric's chosen axis in the context of the specified time period (from somewhen back untill now).
     Defining view's class parameters:
-        metrica                            - an instance of staste.metrica.Metrica class - 
+        TimeserieChart.metrica                            - an instance of staste.metrica.Metrica class - 
                                              specifies the metric the view is dealing with;
-        template_name                      - specifies the template the output would be rendered with.
+        TimeserieChart.template_name                      - specifies the template the output would be rendered with.
     Context:
        {{ axis.name }}                         - the name of presented axis (described below);
        {{ axis.data }}                         - a dict, where keys are current axis' possible choices and values are lists of tuples
@@ -119,3 +119,20 @@ class TimeserieChart(Chart):
         axis_data = {'name': 'Timeline: %s statistic.' % axis_displayed,
                      'data': values,}
         return {'axis': axis_data}
+
+
+class LatestCountAndAverageChart(Chart):
+    template_name = 'staste/charts/latest_count_and_average.html'
+
+    title = 'Counts and Averages'
+
+    def get_context_data(self):
+        vs = self.metrica.values()
+
+        since = datetime.datetime.now() - datetime.timedelta(hours=1)
+
+        data = list(vs.timeserie_counts_and_averages(since,
+                                                     datetime.datetime.now()))
+
+        return {'title': self.title,
+                'axis': {'data': data}}

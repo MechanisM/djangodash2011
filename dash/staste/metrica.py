@@ -298,16 +298,23 @@ class AveragedMetricaValues(MetricaValues):
                               _hash_key_postfix=':__len__',
                               _mult=1)
 
-    def timeserie_averages(self, since, until, scale=None):
+    def timeserie_counts_and_averages(self, since, until, scale=None):
+
         vals = self.timeserie(since, until, scale)
         counts = self.timeserie_counts(since, until, scale)
         
-        for (k1, v1), (k2, v2) in zip(vals, counts):
+        for (k1, total), (k2, count) in zip(vals, counts):
             assert k1 == k2
 
-            if not v2:
-                yield k1, 0
-            else:
-                yield k1, v1 / v2
+            try:
+                avg = total / count
+            except ZeroDivisionError:
+                avg = 0
 
+            yield k1, count, avg
         
+    def timeserie_averages(self, since, until, scale=None):
+        count_avgs = self.timeserie_counts_and_averages(self, since, until, scale)
+        for k, count, avg in count_avgs:
+            yield k, avg
+            

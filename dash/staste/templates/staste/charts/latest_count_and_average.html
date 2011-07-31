@@ -1,0 +1,48 @@
+<html>
+  <head>
+    <script type="text/javascript" src="https://www.google.com/jsapi"></script>
+    <script type="text/javascript">
+      google.load("visualization", "1", {packages:["corechart"]});
+      google.setOnLoadCallback(drawChart);
+      function drawChart() {
+          var data = new google.visualization.DataTable();
+          data.addColumn('datetime', 'Date');
+          data.addColumn('number', 'Request count');
+          data.addColumn('number', 'Average response time');
+
+          data.addRows([
+              {% for row in axis.data %}
+
+              [
+                  new Date("{{ row.0.ctime }}"),
+                  {{ row.1 }},
+                  {{ row.2 }}
+              ]
+              
+              {% if not forloop.last %},{% endif %}
+              {% endfor %}
+
+          ]);
+
+          var formatter = new google.visualization.DateFormat({pattern: 'HH:mm'});
+          formatter.format(data, 0);
+
+          var chart = new google.visualization.ComboChart(document.getElementById('chart_div'));
+          chart.draw(data, {
+              width: document.width - 30,
+              height: window.innerHeight - 30,
+              title: '{{ title|escapejs }}',
+              series: {1: {targetAxisIndex: 1}},
+              vAxes:[
+                  {title: 'Requests count'}, // Nothing specified for axis 0
+                  {title: 'Response time, s'} // Axis 1
+              ]
+          });
+      }
+    </script>
+  </head>
+
+  <body>
+    <div id="chart_div"></div>
+  </body>
+</html>
